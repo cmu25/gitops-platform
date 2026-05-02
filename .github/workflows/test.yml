@@ -10,4 +10,5 @@ jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Input was: ${{ github.event.inputs.app_name }}"
+    - run: |
+        echo "Input was: ${{ github.event.inputs.app_name }}"
