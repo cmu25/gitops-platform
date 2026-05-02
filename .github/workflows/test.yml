@@ -1,0 +1,13 @@
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "Service name"
+        required: true
+        type: string
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Input war: ${{ inputs.app_name }}"
