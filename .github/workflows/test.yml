@@ -18,5 +18,6 @@ jobs:
   
   seed-repos:
     needs: create-repos
+    runs-on: ubuntu-latest
     steps:
       - run: echo "${{ needs.create-repos.outputs.app_url }}"
