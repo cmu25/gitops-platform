@@ -2,13 +2,21 @@ on:
   workflow_dispatch:
     inputs:
       app_name:
-        description: "Service name"
+        description: "App name"
         required: true
         type: string
 
 jobs:
-  hello:
+  create-repos:
+    outputs:
+      app_url: ${{steps.create.outputs.url}}
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo "Input was: ${{ github.event.inputs.app_name }}"
+    - id: create
+      run: |
+        echo "url=https://github.com/${{ github.repository_owner }}/${{ inputs.app_name }}" >> $GITHUB_OUTPUT
+  
+  seed-repos:
+    needs: create-repos
+    steps:
+      - run: echo "${{ needs.create-repos.outputs.app_url }}"
