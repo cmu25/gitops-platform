@@ -1,3 +1,4 @@
+name: Bootstrap environment
 on:
   workflow_dispatch:
     inputs:
@@ -7,25 +8,44 @@ on:
         type: string
 
 jobs:
-  create_repos:
-    name: Create Repositories
+  create-repos:
+    name: Generate token for Github App
     runs-on: ubuntu-latest
     outputs:
-      app_url: ${{ steps.create.outputs.app_url }}
-      config_url: ${{ steps.create.outputs.config_url }}
+      app_url: ${{ steps.create-app.outputs.app_url }}
+      config_url: ${{ steps.create-config.outputs.config_url }}
     steps:
-      - name: Create repos and set outputs
-        id: create
+      - name: Generate token for GitHub App
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          
+      - name: Create app repository
+        id: create-app
         run: |
           echo "app_url=https://github.com/${{ github.repository_owner }}/${{ inputs.app_name }}" >> $GITHUB_OUTPUT
+          gh repo create ${{ github.repository_owner }}/${{ inputs.app_name }} \
+            --private
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
+      - name: Create config repository
+        id: create-config
+        run: |
           echo "config_url=https://github.com/${{ github.repository_owner }}/${{ inputs.app_name }}-config" >> $GITHUB_OUTPUT
+          gh repo create ${{ github.repository_owner }}/${{ inputs.app_name }}-config \
+            --private
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
   seed_repos:
     name: Seed Repositories
     runs-on: ubuntu-latest
-    needs: create_repos
+    needs: create-repos
     steps:
-      - name: Print repo URLs
+      - name: Print Message
         run: |
-          echo "${{ needs.create_repos.outputs.app_url }}"
-          echo "${{ needs.create_repos.outputs.config_url }}"
+          echo "${{ needs.create-repos.outputs.app_url }}"
+          echo "${{ needs.create-repos.outputs.config_url }}"
