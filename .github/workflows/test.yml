@@ -15,6 +15,13 @@ jobs:
       app_url: ${{ steps.create-app.outputs.app_url }}
       config_url: ${{ steps.create-config.outputs.config_url }}
     steps:
+      - name: Debug token permissions
+        run: |
+          gh auth status
+          gh api /installation/repositories
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          
       - name: Generate token for GitHub App
         uses: actions/create-github-app-token@v1
         id: app-token
