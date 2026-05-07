@@ -30,6 +30,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           
       - name: Create app repository
+        needs: app-token
         id: create-app
         run: |
           echo "app_url=https://github.com/${{ github.repository_owner }}/${{ inputs.app_name }}" >> $GITHUB_OUTPUT
@@ -39,6 +40,7 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Create config repository
+        needs: app-token
         id: create-config
         run: |
           echo "config_url=https://github.com/${{ github.repository_owner }}/${{ inputs.app_name }}-config" >> $GITHUB_OUTPUT
