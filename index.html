@@ -1,3 +1,4 @@
+<!DOCTYPE html> 
 <head>
   <style>
     #confirm {
@@ -8,7 +9,7 @@
 
 <h1>GitOps Template App</h1>
 <div id="initial"><p>Please input your app name and click Setup.</p>
-<form onsubmit="setup()">
+<form onsubmit="setup(event)">
   <label for="app_name">App name:</label><br>
   <input type="text" id="app_name" name="app_name" required><br>
   <input type="submit" value="Setup">
