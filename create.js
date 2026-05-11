@@ -1,12 +1,3 @@
-export default async function handler(req, res){
-const { app_name, owner } = req.body;
-
-// Read access token from cookie
-const cookies = Object.fromEntries(
-    req.headers.cookie.split('; ').map(c => c.split('='))
-);
-const accessToken = cookies.token;
-
 async function createRepo(accessToken, url, name) {
   const createRepoResponse = await fetch(url, {
         method: 'POST',
@@ -19,6 +10,15 @@ async function createRepo(accessToken, url, name) {
             throw new Error(`Failed to create ${name}: ${data.message}`);
         }
 }
+
+export default async function handler(req, res){
+const { app_name, owner } = req.body;
+
+// Read access token from cookie
+const cookies = Object.fromEntries(
+    req.headers.cookie.split('; ').map(c => c.split('='))
+);
+const accessToken = cookies.token;
 
 // Find out if user is an org or a personal account
     const userResponse = await fetch('https://api.github.com/user', {
@@ -33,7 +33,7 @@ if (user.login === owner) {
             await createRepo(accessToken, 'https://api.github.com/user/repos', app_name);
             await createRepo(accessToken, 'https://api.github.com/user/repos', `${app_name}-config`);
         } catch (err) {
-            return res.status(500).send(err.message);
+            return res.status(500).json({ message: err.message });
         }
     } else {
         // User is org
@@ -41,7 +41,7 @@ if (user.login === owner) {
             await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, app_name);
             await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, `${app_name}-config`);
         } catch (err) {
-            return res.status(500).send(err.message);
+            return res.status(500).json({ message: err.message });
         }
     }
 
