@@ -8,7 +8,7 @@
 </head>
 
 <h1>GitOps Template App</h1>
-<div id="initial"><p>Please input your app name and click Setup.</p>
+<div id="initial"><p>Please input your app name and click Setup. You will subsequently be asked to sign in with GitHub.</p>
 <form onsubmit="setup(event)">
   <label for="app_name">App name:</label><br>
   <input type="text" id="app_name" name="app_name" required><br>
@@ -16,7 +16,7 @@
 </form></div>
 
 <div id="confirm" style="display:none">
-    <p>Please select a personal account or org and click confirm. Your repositories will be created there.</p>
+    <p>Please select a personal account or org and click confirm. Your repositories will automatically be created there.</p>
     <label for="owners">Accounts and Orgs:</label>  
     <select name="owners" id="owners">
     </select>
