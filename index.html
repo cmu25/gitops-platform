@@ -36,7 +36,8 @@
         .trim()                      // remove extra spaces
         .replace(/[^\w\s-]/g, '')    // remove special characters
         .replace(/\s+/g, '-')        // replace spaces with -
-        .replace(/-+/g, '-');        // remove duplicate -
+        .replace(/-+/g, '-')         // remove duplicate -
+        .replace(/[-_]+$/, '');      // remove trailing - or _
     }
 
     if (isPostOAuth) {
