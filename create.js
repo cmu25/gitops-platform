@@ -46,5 +46,5 @@ if (user.login === owner) {
     }
 
     // Repos were created successfully, now redirect
-    res.redirect(`/?success=true&app=${app_name}&owner=${owner}`);
+    res.json({ repoUrl: `https://github.com/${owner}/${app_name}` });
 }

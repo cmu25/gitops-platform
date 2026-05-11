@@ -8,7 +8,7 @@
 
 <h1>GitOps Template App</h1>
 <div id="initial"><p>Please input your app name and click Setup.</p>
-<form>
+<form onsubmit="setup()">
   <label for="app_name">App name:</label><br>
   <input type="text" id="app_name" name="app_name" required><br>
   <input type="submit" value="Setup">
@@ -21,6 +21,8 @@
     </select>
     <button onclick="confirm()">Confirm</button>
 </div>
+
+<div id="message"></div> <!-- Error or success message -->
 
 <script>
     const params = new URLSearchParams(window.location.search);
@@ -36,7 +38,7 @@
         // Get personal account and orgs
         const user = params.get('user');
         const orgNames = JSON.parse(decodeURIComponent(params.get('orgs')));
-        app_name = params.get(app_name);
+        app_name = params.get('app_name');
 
         // Display personal account
         const option = document.createElement('option'); // Create option
@@ -63,6 +65,12 @@
         document.getElementById('confirm').style.display = 'none';
     }
 
+    // When user clicks Setup
+    async function setup(event) {
+        event.preventDefault()
+        window.location.href = `/api/auth?app_name=${app_name}`;
+    }
+
     // When user clicks Confirm
     async function confirm() {
         const owner = document.getElementById('owners').value;
@@ -71,5 +79,14 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ app_name, owner })
         });
+
+        const data = await response.json();
+        if (response.ok) {
+            // success
+            window.location.href= data.repoUrl;
+        } else {
+            // error
+            document.getElementById('message').textContent = data.message;
+        }
     }
 </script>
