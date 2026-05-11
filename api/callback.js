@@ -53,8 +53,8 @@ const { code, state } = req.query;
     headers: { Authorization: `Bearer ${accessToken}` }
     });
     const orgs = await orgsResponse.json();
-    const orgNames = orgs.map(org => org.login);
     console.log('orgs response:', JSON.stringify(orgs)); // Debug
+    const orgNames = orgs.map(org => org.login);
 
     res.redirect(`/?app_name=${app_name}&user=${username}&orgs=${encodeURIComponent(JSON.stringify(orgNames))}`);
 }
