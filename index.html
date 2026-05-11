@@ -1,8 +1,75 @@
-<h1>GitOps Template App</h1>
-<p>Please fill out the form and click Setup.</p>
+<head>
+  <style>
+    #confirm {
+      display: none;
+    }
+  </style>
+</head>
 
+<h1>GitOps Template App</h1>
+<div id="initial"><p>Please input your app name and click Setup.</p>
 <form>
   <label for="app_name">App name:</label><br>
   <input type="text" id="app_name" name="app_name" required><br>
   <input type="submit" value="Setup">
-</form>
+</form></div>
+
+<div id="confirm" style="display:none">
+    <p>Please select a personal account or org and click confirm. Your repositories will be created there.</p>
+    <label for="owners">Accounts and Orgs:</label>  
+    <select name="owners" id="owners">
+    </select>
+    <button onclick="confirm()">Confirm</button>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const isPostOAuth = params.has('user');
+    let app_name = '';
+
+    if (isPostOAuth) {
+        // show dropdown and confirm button
+        document.getElementById('initial').style.display = 'none';
+        document.getElementById('confirm').style.display = 'block';
+        const select = document.getElementById('owners');
+
+        // Get personal account and orgs
+        const user = params.get('user');
+        const orgNames = JSON.parse(decodeURIComponent(params.get('orgs')));
+        app_name = params.get(app_name);
+
+        // Display personal account
+        const option = document.createElement('option'); // Create option
+        option.value = user;                           
+        option.text = `${user} (personal)`;
+        
+        select.appendChild(option); // Add to dropdown
+
+        // Display orgs
+        orgNames.forEach(displayOrgs);
+
+        function displayOrgs(orgName) {
+        const option = document.createElement('option');
+        option.value = orgName;                           
+        option.text = `${orgName} (org)`;
+        
+        select.appendChild(option);
+        }
+
+
+    } else {
+        // show app name form and setup button
+        document.getElementById('initial').style.display = 'block';
+        document.getElementById('confirm').style.display = 'none';
+    }
+
+    // When user clicks Confirm
+    async function confirm() {
+        const owner = document.getElementById('owners').value;
+        const response = await fetch('/api/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ app_name, owner })
+        });
+    }
+</script>

@@ -1,16 +1,3 @@
-async function createRepo(accessToken, url, name) {
-  const createRepoResponse = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ name: name, private: true })
-        });
-        const data = await createRepoResponse.json();
-
-        if (!createRepoResponse.ok) {
-            throw new Error(`Failed to create ${name}: ${data.message}`);
-        }
-}
-
 export default async function handler(req, res){
 const { code, state } = req.query;
     // Turn state string into json object
@@ -50,31 +37,23 @@ const { code, state } = req.query;
     // Extract Access Token
     const accessToken = data.access_token;
 
-    // Find out if user is an org or a personal account
+    // Save access Token as Cookie
+    res.setHeader('Set-Cookie', `token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=300; Path=/`);
+
+    // Fetch user and orgs
     const userResponse = await fetch('https://api.github.com/user', {
     method: 'GET',
     headers: { Authorization: `Bearer ${accessToken}` }
     });
     const user = await userResponse.json();
+    const username = user.login;
+    
+    const orgsResponse = await fetch('https://api.github.com/user/orgs', {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    const orgs = await orgsResponse.json();
+    const orgNames = orgs.map(org => org.login);
 
-    if (user.login === owner) {
-        try {
-            // User is personal account, use user to create repos
-            await createRepo(accessToken, 'https://api.github.com/user/repos', app_name);
-            await createRepo(accessToken, 'https://api.github.com/user/repos', `${app_name}-config`);
-        } catch (err) {
-            return res.status(500).send(err.message);
-        }
-    } else {
-        // User is org
-        try {
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, app_name);
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, `${app_name}-config`);
-        } catch (err) {
-            return res.status(500).send(err.message);
-        }
-    }
-
-    // Repos were created successfully, now redirect
-    res.redirect(`/?success=true&app=${app_name}&owner=${owner}`);
+    res.redirect(`/?app_name=${app_name}&user=${username}&orgs=${encodeURIComponent(JSON.stringify(orgNames))}`);
 }
