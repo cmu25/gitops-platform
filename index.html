@@ -69,7 +69,7 @@
     // When user clicks Setup
     async function setup(event) {
     event.preventDefault();
-    const app_name = document.getElementById('app_name').value;
+    const app_name = slugify(document.getElementById('app_name').value); // app_name in slug-case
     window.location.href = `/api/auth?app_name=${app_name}`;
 }
 
@@ -90,5 +90,14 @@
             // error
             document.getElementById('message').textContent = data.message;
         }
+    }
+
+    function slugify(text) {
+    return text
+        .toLowerCase()               // make lowercase
+        .trim()                      // remove extra spaces
+        .replace(/[^\w\s-]/g, '')    // remove special characters
+        .replace(/\s+/g, '-')        // replace spaces with -
+        .replace(/-+/g, '-');        // remove duplicate -
     }
 </script>
