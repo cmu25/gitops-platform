@@ -11,6 +11,21 @@ async function createRepo(accessToken, url, name) {
         }
 }
 
+async function revokeToken(accessToken){
+        await fetch(`https://api.github.com/applications/${process.env.GITHUB_CLIENT_ID}/token`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Basic ${Buffer.from(`${process.env.GITHUB_CLIENT_ID}:${process.env.GITHUB_CLIENT_SECRET}`).toString('base64')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ access_token: accessToken })
+        }); 
+}
+
+async function deleteCookie(res) {
+    res.setHeader('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/');
+}
+
 export default async function handler(req, res){
 const { app_name, owner } = req.body;
 
@@ -29,22 +44,22 @@ const accessToken = cookies.token;
 
 if (user.login === owner) {
         try {
-            // User is personal account, use user to create repos
-            await createRepo(accessToken, 'https://api.github.com/user/repos', app_name);
-            await createRepo(accessToken, 'https://api.github.com/user/repos', `${app_name}-config`);
+            if (user.login === owner) { // Personal Account
+                await createRepo(accessToken, 'https://api.github.com/user/repos', app_name);
+                await createRepo(accessToken, 'https://api.github.com/user/repos', `${app_name}-config`);
+            } else { // Org
+                await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, app_name);
+                await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, `${app_name}-config`);
+            }
         } catch (err) {
-            return res.status(500).json({ message: err.message });
-        }
-    } else {
-        // User is org
-        try {
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, app_name);
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, `${app_name}-config`);
-        } catch (err) {
+            await revokeToken(accessToken);
+            await deleteCookie(res);
             return res.status(500).json({ message: err.message });
         }
     }
 
     // Repos were created successfully, now redirect
+    await revokeToken(accessToken);
+    await deleteCookie(res);
     res.json({ repoUrl: `https://github.com/${owner}/${app_name}` });
 }
