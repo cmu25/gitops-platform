@@ -14,7 +14,7 @@ export default function handler(req, res){
     const json = {nonce: nonce, hash: hash, app_name: app_name, owner: owner};
 
     // Stringify JSON obj
-    const state_string = JSON.stringify(json);
+    const state_string = encodeURIComponent(JSON.stringify(json));
 
     // redirect to https://github.com/login/oauth/authorize with Client Id and state (JSON object)
     const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&state=${encodeURIComponent(state_string)}`;    
