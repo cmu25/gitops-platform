@@ -1,4 +1,11 @@
-const { code, state } = req.query;
+export default async function handler(req, res){
+const { app_name, owner } = req.body;
+
+// Read access token from cookie
+const cookies = Object.fromEntries(
+    req.headers.cookie.split('; ').map(c => c.split('='))
+);
+const accessToken = cookies.token;
 
 async function createRepo(accessToken, url, name) {
   const createRepoResponse = await fetch(url, {
@@ -40,3 +47,4 @@ if (user.login === owner) {
 
     // Repos were created successfully, now redirect
     res.redirect(`/?success=true&app=${app_name}&owner=${owner}`);
+}
