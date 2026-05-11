@@ -6,7 +6,7 @@ export default function handler(req, res){
     const nonce = crypto.randomBytes(16).toString('hex');
 
     // Hash state secret
-    const hmac = crypto.createHmac('sha256', process.env.state_secret);
+    const hmac = crypto.createHmac('sha256', process.env.STATE_SECRET);
     hmac.update(nonce);
     const hash = hmac.digest('hex');
 
