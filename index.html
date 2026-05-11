@@ -67,9 +67,10 @@
 
     // When user clicks Setup
     async function setup(event) {
-        event.preventDefault()
-        window.location.href = `/api/auth?app_name=${app_name}`;
-    }
+    event.preventDefault();
+    const app_name = document.getElementById('app_name').value;
+    window.location.href = `/api/auth?app_name=${app_name}`;
+}
 
     // When user clicks Confirm
     async function confirm() {
