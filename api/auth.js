@@ -7,7 +7,7 @@ const ratelimit = new Ratelimit({
     limiter: Ratelimit.slidingWindow(10, '1m'), // No more than 10 requests per minute per IP
 });
 
-export default function handler(req, res){
+export default async function handler(req, res){
     const ip = req.headers['x-forwarded-for'] || 'anonymous'; // Rate limit check
     const { success } = await ratelimit.limit(ip);
     if (!success) {
