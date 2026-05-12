@@ -1,5 +1,19 @@
 import crypto from 'crypto';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(10, '1m'), // No more than 10 requests per minute per IP
+});
+
 export default function handler(req, res){
+    const ip = req.headers['x-forwarded-for'] || 'anonymous'; // Rate limit check
+    const { success } = await ratelimit.limit(ip);
+    if (!success) {
+        return res.status(429).json({ message: 'Too many requests. Please try again later.' });
+    }
+
     const { app_name, owner } = req.query;
 
     // Create nonce
