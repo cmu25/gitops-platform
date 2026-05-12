@@ -1,6 +1,6 @@
+import crypto from 'crypto';
 export default function handler(req, res){
     const { app_name, owner } = req.query;
-    const crypto = require('crypto');
 
     // Create nonce
     const nonce = crypto.randomBytes(16).toString('hex');

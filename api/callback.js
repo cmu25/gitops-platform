@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 export default async function handler(req, res){
 const { code, state } = req.query;
     // Turn state string into json object
@@ -8,7 +9,6 @@ const { code, state } = req.query;
     const recievedHash = stateObj.hash;
 
     // Recreate hash
-    const crypto = require('crypto');
     const hmac = crypto.createHmac('sha256', process.env.STATE_SECRET);
     hmac.update(stateObj.nonce);
     const hash = hmac.digest('hex');
