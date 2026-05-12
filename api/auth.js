@@ -31,6 +31,6 @@ export default async function handler(req, res){
     const state_string = encodeURIComponent(JSON.stringify(json));
 
     // redirect to https://github.com/login/oauth/authorize with Client Id and state (JSON object)
-    const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo%20read:org&state=${state_string}`;
+    const url = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo%20read:org%20delete_repo&state=${state_string}`;
     res.redirect(url);
 }
