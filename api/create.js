@@ -6,7 +6,13 @@ async function createRepo(accessToken, url, name) {
     });
     const data = await createRepoResponse.json();
     if (!createRepoResponse.ok) {
-        throw new Error(`Failed to create ${name}: ${data.message}`);
+        if (createRepoResponse.status === 422) {
+            throw new Error(`Repository "${name}" already exists.`);
+        } else if (createRepoResponse.status === 403) {
+            throw new Error(`You don't have permission to create repositories here.`);
+        } else {
+            throw new Error(`Failed to create repository "${name}". Please try again.`);
+        }
     }
 }
 
