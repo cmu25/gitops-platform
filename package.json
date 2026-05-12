@@ -1,0 +1,25 @@
+{
+  "name": "gitops-platform",
+  "version": "1.0.0",
+  "description": "![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?logo=vercel)\r ![License](https://img.shields.io/badge/license-MIT-blue)\r ![Node](https://img.shields.io/badge/runtime-Node.js-green?logo=node.js)\r This project lets you create two repos for a GitOps Workflow (app + config) automatically. Deployed on [Vercel](https://gitops-platform.vercel.app/).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmu25/gitops-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cmu25/gitops-platform/issues"
+  },
+  "homepage": "https://github.com/cmu25/gitops-platform#readme",
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0"
+  }
+}
