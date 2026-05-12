@@ -32,9 +32,28 @@ async function deleteCookie(res) {
     res.setHeader('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/');
 }
 
+function validateAppName(app_name){
+    if(app_name.length < 1 || app_name.length > 100){
+        return "App name must be between 1 and 100 characters.";
+    }
+    else if(/[^A-Za-z0-9\-\_]/.test(app_name)){
+        return "App name can only contain letters, numbers, hypens and underscores."
+    }
+    return null;
+}
+
 export default async function handler(req, res) {
     const { app_name, owner } = req.body;
     let appRepoCreated = false;
+
+    // Validate app name and owner
+    const validationError = validateAppName(app_name);
+    if (validationError) {
+        return res.status(400).json({ message: validationError });
+    }
+    if (!owner) {
+    return res.status(400).json({ message: 'Owner is required.' });
+    }
 
     // Read access token from cookie
     const cookies = Object.fromEntries(
