@@ -40,9 +40,7 @@ The rate limiting I implemented does not protect against distributed attacks or 
 - Vercel Serverless Functions to implement the OAuth App on the server side
 
 ## Road Map (What's next?)
-1. Add a rollback mechanism in case repo creation fails
-2. Add app name input validation in create.js
-3. Map Error Messages to prevent leaks
-4. Seed repositories with templates
-5. Automatically Link repositories together after creation
-6. Implement automatic ArgoCD setup
+1. Create template repositories
+2. Seed repositories with templates
+3. Automatically Link repositories together after creation
+4. Implement automatic ArgoCD setup
