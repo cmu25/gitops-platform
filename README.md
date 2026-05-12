@@ -34,8 +34,10 @@ As explained in the Architecture Section, i traded off the modernity and added s
 - Vercel Serverless Functions to implement the OAuth App on the server side
 
 ## Road Map (What's next?)
-1. Automatically revoke OAuth App token permissions after successful repository creation
-2. Seeding repositories with templates
-3. Adding a rollback mechanism in case the repo creation fails
-4. Automatically Link repositories together after creation
-5. Implement automatic ArgoCD setup
+1. Add rate limiting
+2. Add a rollback mechanism in case repo creation fails
+3. Add app name input validation in create.js
+4. Map Error Messages to prevent leaks
+5. Seed repositories with templates
+6. Automatically Link repositories together after creation
+7. Implement automatic ArgoCD setup
