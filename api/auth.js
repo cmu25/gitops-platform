@@ -14,7 +14,7 @@ export default async function handler(req, res){
         return res.status(429).json({ message: 'Too many requests. Please try again later.' });
     }
 
-    const { app_name, owner } = req.query;
+    const { app_name } = req.query;
 
     // Create nonce
     const nonce = crypto.randomBytes(16).toString('hex');
@@ -24,8 +24,8 @@ export default async function handler(req, res){
     hmac.update(nonce);
     const hash = hmac.digest('hex');
 
-    // Create JSON object with necessary things to put in state (app_name, owner, state secret)
-    const json = {nonce: nonce, hash: hash, app_name: app_name, owner: owner};
+    // Create JSON object with necessary things to put in state (app_name, nonce, hmac hash)
+    const json = {nonce: nonce, hash: hash, app_name: app_name};
 
     // Stringify JSON obj
     const state_string = encodeURIComponent(JSON.stringify(json));
