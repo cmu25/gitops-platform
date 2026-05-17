@@ -25,6 +25,12 @@ I used Upstash Redis with a sliding window algorithm to limit requests to 10 per
 5. The User is redirected to the app repository of their freshly created dual-repo setup
 
 ## Setup
+1. Visit the [Vercel App](https://gitops-platform.vercel.app/).
+2. Enter your App's name and click 'Setup.'
+3. You will now be redirected to the GitHub sign in page. Sign in with your account here.
+4. After being redirected, choose where you want to create your GitHub repositories (your personal account or any organization where you have the right to create repos) and click 'Confirm.'
+5. Wait a few seconds for the Vercel App to create your repos.
+6. After successful creation, you will be redirected to your newly created app repository. A repository named {your_app_name}-config will have been created in the same space.
 
 ## Usage
 
@@ -38,6 +44,7 @@ The rate limiting I implemented does not protect against distributed attacks or 
 ## Tech Stack
 - GitHub OAuth App to conveniently create repositories
 - Vercel Serverless Functions to implement the OAuth App on the server side
+- Upstash Redis for rate limiting
 
 ## Road Map (What's next?)
 1. Create template repositories
