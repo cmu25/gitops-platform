@@ -1,8 +1,8 @@
-async function createRepo(accessToken, url, name) {
+async function createRepo(accessToken, url, name, owner) {
     const createRepoResponse = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ name: name, private: true })
+        body: JSON.stringify({ name: name, owner: owner, private: true })
     });
     const data = await createRepoResponse.json();
     if (!createRepoResponse.ok) {
@@ -67,23 +67,10 @@ export default async function handler(req, res) {
     );
     const accessToken = cookies.token;
 
-    // Find out if user is an org or a personal account
-    const userResponse = await fetch('https://api.github.com/user', {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${accessToken}` }
-    });
-    const user = await userResponse.json();
-
     try {
-        if (user.login === owner) { // Personal Account
-            await createRepo(accessToken, 'https://api.github.com/user/repos', app_name);
-            appRepoCreated = true;
-            await createRepo(accessToken, 'https://api.github.com/user/repos', `${app_name}-config`);
-        } else { // Org
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, app_name);
-            appRepoCreated = true;
-            await createRepo(accessToken, `https://api.github.com/orgs/${owner}/repos`, `${app_name}-config`);
-        }
+        await createRepo(accessToken, 'https://api.github.com/repos/cmu25/gitops-app-template/generate', app_name, owner);
+        appRepoCreated = true;
+        await createRepo(accessToken, 'https://api.github.com/repos/cmu25/gitops-config-template/generate', `${app_name}-config`, owner);
     } catch (err) {
         if (appRepoCreated) {
             await deleteRepo(accessToken, `https://api.github.com/repos/${owner}/${app_name}`);
