@@ -4,7 +4,6 @@ async function createRepo(accessToken, url, name, owner) {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ name: name, owner: owner, private: true })
     });
-    const data = await createRepoResponse.json();
     if (!createRepoResponse.ok) {
         if (createRepoResponse.status === 422) {
             throw new Error(`Repository "${name}" already exists.`);
@@ -43,7 +42,7 @@ function validateAppName(app_name){
         return "App name must be between 1 and 100 characters.";
     }
     else if(/[^A-Za-z0-9\-\_]/.test(app_name)){
-        return "App name can only contain letters, numbers, hypens and underscores."
+        return "App name can only contain letters, numbers, hyphens and underscores."
     }
     return null;
 }

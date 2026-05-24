@@ -19,7 +19,6 @@ const { code, state } = req.query;
     }
     
     const app_name = stateObj.app_name;
-    const owner = stateObj.owner;
 
     // exchange code for access token
     const response = await fetch('https://github.com/login/oauth/access_token', {
