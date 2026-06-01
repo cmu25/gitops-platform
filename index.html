@@ -25,29 +25,38 @@
     <button onclick="confirm()">Confirm</button>
 </div>
 
+<div id="repos-created" style="display:none">
+    <p>Repositories created successfully!<br>Preparing your GitHub App for authentication ...</p>
+    <form id="app-manifest-form" action="https://github.com/settings/apps/new" method="post">
+        <input type="hidden" id="app-manifest" name="manifest" value="">
+    </form>
+</div>
+
 <div id="message"></div> <!-- Error or success message -->
 
 <script>
     const params = new URLSearchParams(window.location.search);
     const isPostOAuth = params.has('user');
     let app_name = '';
+    let user = '';
 
     if (isPostOAuth) {
         // show dropdown and confirm button
         document.getElementById('initial').style.display = 'none';
+        document.getElementById('repos-created').style.display = 'none';
         document.getElementById('confirm').style.display = 'block';
         const select = document.getElementById('owners');
 
         // Get personal account and orgs
-        const user = params.get('user');
+        user = params.get('user');
         const orgNames = JSON.parse(decodeURIComponent(params.get('orgs')));
         app_name = params.get('app_name');
 
         // Display personal account
         const option = document.createElement('option'); // Create option
-        option.value = user;                           
+        option.value = user;
         option.text = `${user} (personal)`;
-        
+
         select.appendChild(option); // Add to dropdown
 
         // Display orgs
@@ -55,16 +64,15 @@
 
         function displayOrgs(orgName) {
         const option = document.createElement('option');
-        option.value = orgName;                           
+        option.value = orgName;
         option.text = `${orgName} (org)`;
-        
+
         select.appendChild(option);
         }
-
-
     } else {
         // show app name form and setup button
         document.getElementById('initial').style.display = 'block';
+        document.getElementById('repos-created').style.display = 'none';
         document.getElementById('confirm').style.display = 'none';
     }
 
@@ -92,7 +100,36 @@
         const data = await response.json();
         if (response.ok) {
             // success
-            window.location.href= data.repoUrl;
+            document.getElementById('initial').style.display = 'none';
+            document.getElementById('confirm').style.display = 'none';
+            document.getElementById('repos-created').style.display = 'block';
+
+            const manifest = {
+                name: `${owner}-${app_name}-gitops`,
+                url: `https://gitops-platform.vercel.app`,
+                redirect_url: "https://gitops-platform.vercel.app/api/app-callback",
+                setup_url: "https://gitops-platform.vercel.app/api/app-installed",
+                setup_on_update: false,
+                callback_urls: ["https://gitops-platform.vercel.app/api/app-callback"],
+                public: false,
+                default_permissions: {
+                    contents: "read",
+                    actions: "write",
+                    secrets: "write",
+                    metadata: "read"
+                }
+            };
+            document.getElementById('app-manifest').value = JSON.stringify(manifest);
+
+            if (user === owner) { // Personal Account
+                document.getElementById('app-manifest-form').action = 'https://github.com/settings/apps/new';
+            } else { // Organization
+                document.getElementById('app-manifest-form').action = `https://github.com/organizations/${owner}/settings/apps/new`;
+            }
+
+            setTimeout(() => {
+                document.getElementById('app-manifest-form').submit();
+            }, 2000);
         } else {
             // error
             document.getElementById('message').textContent = data.message;

@@ -20,6 +20,7 @@
   "homepage": "https://github.com/cmu25/gitops-platform#readme",
   "dependencies": {
     "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.38.0"
+    "@upstash/redis": "^1.38.0",
+    "libsodium-wrappers": "^0.8.4"
   }
 }

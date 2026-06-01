@@ -1,3 +1,4 @@
+import { validateAppName, revokeToken, deleteCookie, rateLimit } from './utils.js';
 async function createRepo(accessToken, url, name, owner) {
     const createRepoResponse = await fetch(url, {
         method: 'POST',
@@ -22,38 +23,20 @@ async function deleteRepo(accessToken, url) {
     });
 }
 
-async function revokeToken(accessToken) {
-    await fetch(`https://api.github.com/applications/${process.env.GITHUB_CLIENT_ID}/token`, {
-        method: 'DELETE',
-        headers: {
-            Authorization: `Basic ${Buffer.from(`${process.env.GITHUB_CLIENT_ID}:${process.env.GITHUB_CLIENT_SECRET}`).toString('base64')}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ access_token: accessToken })
-    });
-}
-
-async function deleteCookie(res) {
-    res.setHeader('Set-Cookie', 'token=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/');
-}
-
-function validateAppName(app_name){
-    if(app_name.length < 1 || app_name.length > 100){
-        return "App name must be between 1 and 100 characters.";
-    }
-    else if(/[^A-Za-z0-9\-\_]/.test(app_name)){
-        return "App name can only contain letters, numbers, hyphens and underscores."
-    }
-    return null;
-}
-
 export default async function handler(req, res) {
     const { app_name, owner } = req.body;
     let appRepoCreated = false;
+    const ip = req.headers['x-forwarded-for'] || 'anonymous'; // Rate limit check
+    const { success } = await rateLimit.limit(ip);
+    if (!success) {
+        return res.status(429).json({ message: 'Too many requests. Please try again later.' });
+    }
 
     // Validate app name and owner
     const validationError = validateAppName(app_name);
     if (validationError) {
+        await revokeToken(accessToken);
+        await deleteCookie(res);
         return res.status(400).json({ message: validationError });
     }
     if (!owner) {
@@ -79,8 +62,10 @@ export default async function handler(req, res) {
         return res.status(500).json({ message: err.message });
     }
 
-    // Repos were created successfully
-    await revokeToken(accessToken);
-    await deleteCookie(res);
+    // Put app name and owner in cookie so it can be used after app creation (GitHub sends different state)
+    res.setHeader('Set-Cookie', [
+        `app_name=${app_name}; HttpOnly; Secure; SameSite=Lax; Max-Age=300; Path=/`,
+        `owner=${owner}; HttpOnly; Secure; SameSite=Lax; Max-Age=300; Path=/`
+    ]);
     res.json({ repoUrl: `https://github.com/${owner}/${app_name}` });
 }
