@@ -37,8 +37,13 @@
 <script>
     const params = new URLSearchParams(window.location.search);
     const isPostOAuth = params.has('user');
+    const error = params.get('error');
     let app_name = '';
     let user = '';
+
+    if (error) {
+        document.getElementById('message').textContent = decodeURIComponent(error);
+    }
 
     if (isPostOAuth) {
         // show dropdown and confirm button

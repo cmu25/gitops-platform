@@ -32,22 +32,23 @@ export default async function handler(req, res) {
         return res.status(429).json({ message: 'Too many requests. Please try again later.' });
     }
 
+    // Read access token from cookie
+    if (!req.headers.cookie) {
+        return res.status(401).json({ message: 'Session expired. Please start over.' });
+    }
+    const cookies = Object.fromEntries(
+        req.headers.cookie.split('; ').map(c => c.split('='))
+    );
+    const accessToken = cookies.token;
+
     // Validate app name and owner
     const validationError = validateAppName(app_name);
     if (validationError) {
-        await revokeToken(accessToken);
-        await deleteCookie(res);
         return res.status(400).json({ message: validationError });
     }
     if (!owner) {
     return res.status(400).json({ message: 'Owner is required.' });
     }
-
-    // Read access token from cookie
-    const cookies = Object.fromEntries(
-        req.headers.cookie.split('; ').map(c => c.split('='))
-    );
-    const accessToken = cookies.token;
 
     try {
         await createRepo(accessToken, 'https://api.github.com/repos/cmu25/gitops-app-template/generate', app_name, owner);
