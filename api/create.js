@@ -33,13 +33,13 @@ export default async function handler(req, res) {
     }
 
     // Read access token from cookie
-    if (!req.headers.cookie) {
-        return res.status(401).json({ message: 'Session expired. Please start over.' });
-    }
     const cookies = Object.fromEntries(
         req.headers.cookie.split('; ').map(c => c.split('='))
     );
     const accessToken = cookies.token;
+    if (!accessToken) {
+        return res.status(401).json({ message: 'Session expired. Please start over.' });
+    }
 
     // Validate app name and owner
     const validationError = validateAppName(app_name);
