@@ -1,4 +1,5 @@
 import { revokeToken, deleteCookie, createRepoSecret } from './utils.js';
+import { renderCredentialsPage } from './render-credentials-page.js';
 
 export default async function handler(req, res) {
     const { installation_id, setup_action, state } = req.query;
@@ -14,26 +15,32 @@ export default async function handler(req, res) {
         })
     );
     const accessToken = cookies.token;
-
-    if (!accessToken) {
-        return res.status(400).json({ message: 'Session expired. Please start over.' });
-    }
-
     const app_name = cookies.app_name;
     const owner = cookies.owner;
+    const app_id = cookies.app_id;
+    const app_private_key = decodeURIComponent(cookies.app_private_key || '');
 
-    // Store credentials as repo secrets
-    try {
-        await createRepoSecret(owner, app_name,             'BOT_APP_INSTALLATION_ID', installation_id, accessToken);
-        await createRepoSecret(owner, `${app_name}-config`, 'BOT_APP_INSTALLATION_ID', installation_id, accessToken);
-    } catch (err) {
-        await revokeToken(accessToken);
-        await deleteCookie(res);
-        return res.redirect(`/?error=${encodeURIComponent('GitHub App was created but installation ID could not be stored. Please add BOT_INSTALLATION_ID manually to both of your repo’s secrets.')}`);
-    }
+    await createRepoSecret(owner, app_name,             'BOT_APP_INSTALLATION_ID', installation_id, accessToken);
+    await createRepoSecret(owner, `${app_name}-config`, 'BOT_APP_INSTALLATION_ID', installation_id, accessToken);
 
     await revokeToken(accessToken);
     await deleteCookie(res);
 
-    return res.redirect(`https://github.com/${owner}/${app_name}`);
+    // Clear the temporary credential cookies — they must not outlive this response.
+    res.setHeader('Set-Cookie', [
+        'app_id=; Max-Age=0; Path=/',
+        'app_private_key=; Max-Age=0; Path=/',
+    ]);
+
+    const html = renderCredentialsPage({
+        owner,
+        app_name,
+        bot_id: app_id,
+        bot_app_installation_id: installation_id,
+        bot_private_key: app_private_key,
+        repo_url: `https://github.com/${owner}/${app_name}`,
+    });
+
+    res.setHeader('Content-Type', 'text/html');
+    return res.status(200).send(html);
 }

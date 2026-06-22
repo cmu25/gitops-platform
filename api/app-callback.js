@@ -49,6 +49,14 @@ export default async function handler(req, res){
         return res.redirect(`/?error=${encodeURIComponent('Failed to create GitHub App. Please try again.')}`);
     }
 
+    // Carry credentials forward to app-installed via short-lived cookies.
+    // Repo secrets are write-only so this is the only way to get them to the
+    // credentials download page. Max-Age=300 gives 5 minutes to complete installation.
+    res.setHeader('Set-Cookie', [
+        `app_id=${app_id}; HttpOnly; Secure; SameSite=Lax; Max-Age=300; Path=/`,
+        `app_private_key=${encodeURIComponent(app_private_key)}; HttpOnly; Secure; SameSite=Lax; Max-Age=300; Path=/`,
+    ]);
+
     const app_slug = credentials.slug;
     return res.redirect(`https://github.com/apps/${app_slug}/installations/new`);
 }
